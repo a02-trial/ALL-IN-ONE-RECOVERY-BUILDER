@@ -1,36 +1,37 @@
-name: TWRP Recovery Builder
+name: PitchBlack Recovery Project Builder
 
 on:
   workflow_dispatch:
     inputs:
       MANIFEST_BRANCH:
-        description: 'TWRP Manifest Branch'
+        description: 'PBRP Manifest Branch'
         required: true
-        default: 'twrp-12.1'
+        default: 'android-12.1'
         type: choice
         options:
-          - twrp-14.0
-          - twrp-12.1
-          - twrp-11.0
-          - twrp-10.0
-          - twrp-9.0
-          - twrp-8.1
-          - twrp-7.1
-          - twrp-6.0
+          - android-14.0
+          - android-12.1
+          - android-11.0
+          - android-10.0
+          - android-9.0
+          - android-8.1
+          - android-7.1
+          - android-6.0
       DEVICE_TREE:
-        description: 'Device Tree URL'
+        description: 'Custom Recovery Tree URL'
         required: true
-        default: 'https://github.com/yourusername/android_device_example'
+        default: 'https://github.com/enter_username/repo_name'
       DEVICE_TREE_BRANCH:
         description: 'Device Tree Branch (optional)'
         required: false
         default: ''
       BUILD_TARGET:
-        description: 'Build Target'
+        description: 'Build Target (use "pbrp" for Android 11+)'
         required: true
         default: 'recovery'
         type: choice
         options:
+          - pbrp
           - recovery
           - boot
           - vendorboot
@@ -41,7 +42,7 @@ on:
 
 jobs:
   build:
-    name: Build TWRP by ${{ github.actor }}
+    name: Build PBRP by ${{ github.actor }}
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
     env:
@@ -58,13 +59,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Install Dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y python2 python-is-python2 libncurses5-dev lib32ncurses-dev
-        curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
-        sudo python2 get-pip.py
-
     - name: Clean-up
       uses: rokibhasansagar/slimhub_actions@main
 
@@ -73,7 +67,13 @@ jobs:
       with:
         swap-size-gb: 24
 
-    - name: Build TWRP
+    - name: Install Python 2.7 and Create Symlink
+      run: |
+        sudo apt update
+        sudo apt install -y python2
+        sudo ln -sf /usr/bin/python2 /usr/bin/python
+
+    - name: Build PitchBlack Recovery
       uses: mlm-games/pitchblack-pbrp-builder-action@main
       id: build
       with:
@@ -86,7 +86,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: inputs.upload_releases == false || github.event_name != 'workflow_dispatch'
       with:
-        name: TWRP-Recovery-${{ env.DEVICE_NAME }}-${{ env.BUILD_DATE }}
+        name: PBRP-Recovery-${{ env.DEVICE_NAME }}-${{ env.BUILD_DATE }}
         path: |
           ${{ env.OUTPUT_DIR }}/*.img
           ${{ env.OUTPUT_DIR }}/*.tar
@@ -99,8 +99,8 @@ jobs:
       with:
         files: |
           ${{ env.OUTPUT_DIR }}/*.img
-          ${{ env.OUTPUT_DIR }}/TWRP*.zip
-        name: TWRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
+          ${{ env.OUTPUT_DIR }}/PBRP*.zip
+        name: PBRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
           ## Build Information
