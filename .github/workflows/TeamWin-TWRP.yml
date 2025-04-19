@@ -1,4 +1,4 @@
-name: PitchBlack Recovery Project Builder
+name: TWRP
 
 on:
   workflow_dispatch:
