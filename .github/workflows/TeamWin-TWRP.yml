@@ -9,7 +9,7 @@ on:
         default: 'twrp-12.1'
         type: choice
         options:
-          - twrp-14
+          - twrp-14.0
           - twrp-12.1
           - twrp-11.0
           - twrp-10.0
@@ -42,7 +42,7 @@ on:
 jobs:
   build:
     name: Build TWRP by ${{ github.actor }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
     env:
       DEBIAN_FRONTEND: noninteractive
@@ -57,6 +57,13 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python2 python-is-python2 libncurses5-dev lib32ncurses-dev
+        curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+        sudo python2 get-pip.py
 
     - name: Clean-up
       uses: rokibhasansagar/slimhub_actions@main
