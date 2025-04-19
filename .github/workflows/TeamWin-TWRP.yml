@@ -1,4 +1,4 @@
-name: TeamWin [TWRP]
+name: Build TWRP Recovery
 
 on:
   workflow_dispatch:
@@ -9,53 +9,53 @@ on:
         default: 'twrp-12.1'
         type: choice
         options:
-        - twrp-14
-        - twrp-12.1
-        - twrp-11
-        - twrp-10.0-deprecated
-        - twrp-9.0
-        - twrp-8.1
-        - twrp-8.1-macOS
-        - twrp-7.1
-        - twrp-6.0
-        - twrp-5.1
-        - twrp-4.4-deprecated
+          - twrp-14
+          - twrp-12.1
+          - twrp-11
+          - twrp-10.0-deprecated
+          - twrp-9.0
+          - twrp-8.1
+          - twrp-8.1-macOS
+          - twrp-7.1
+          - twrp-6.0
+          - twrp-5.1
+          - twrp-4.4-deprecated
       DEVICE_TREE:
-        description: 'Custom Recovery Tree' # Your already made Device Tree for TWRP
+        description: 'Custom Recovery Tree'
         required: true
         default: ''
       DEVICE_TREE_BRANCH:
-        description: 'Custom Recovery Tree Branch' # Your Device Tree Branch, make sure it's right.
+        description: 'Custom Recovery Tree Branch'
         required: true
         default: ''
       DEVICE_PATH:
-        description: 'DEVICE_PATH'
+        description: 'Device Path'
         required: true
         default: ''
       DEVICE_NAME:
-        description: 'DEVICE_NAME'
+        description: 'Device Name'
         required: true
         default: ''
       MAKEFILE_NAME:
-        description: 'MAKEFILE_NAME (without including .mk, Example: omni_7304F)'
+        description: 'Makefile Name (without .mk extension, e.g., omni_7304F)'
         required: true
         default: ''
       BUILD_TARGET:
-        description: 'Specify your Build Target' # Pick among boot, recovery and vendor_boot
+        description: 'Specify your Build Target'
         required: true
         default: 'vendorboot'
         type: choice
         options:
-        - boot
-        - recovery
-        - vendorboot
+          - boot
+          - recovery
+          - vendorboot
       LDCHECK:
         description: 'Use LDCHECK'
         required: false
         default: 'false'
         type: boolean
       LDCHECKPATH:
-        description: 'Path of blobs to check' # Use it know what kind of dependencies your missing for decryption blobs.
+        description: 'Path of blobs to check'
         required: true
         default: 'system/bin/qseecomd'
 
