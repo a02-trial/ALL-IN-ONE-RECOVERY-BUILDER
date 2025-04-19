@@ -1,4 +1,4 @@
-name: TWRP
+name: TeamWin [TWRP]
 
 on:
   workflow_dispatch:
