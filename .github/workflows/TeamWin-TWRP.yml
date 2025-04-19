@@ -8,9 +8,22 @@ on:
         required: true
         default: 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp'
       MANIFEST_BRANCH:
-        description: 'MANIFEST_BRANCH'
+        description: 'TWRP Manifest Branch'
         required: true
-        default: 'twrp-12.1'
+        default: ''
+        type: choice
+        options:
+        - twrp-14
+        - twrp-12.1
+        - twrp-11
+        - twrp-10.0-deprecated
+        - twrp-9.0
+        - twrp-8.1
+        - twrp-8.1-macOS
+        - twrp-7.1
+        - twrp-6.0
+        - twrp-5.1
+        - twrp-4.4-deprecated
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
@@ -38,9 +51,14 @@ on:
         required: true
         default: 'twrp_I003D'
       BUILD_TARGET:
-        description: 'BUILD_TARGET'
+        description: 'Specify your Build Target' # Pick among boot, recovery and vendor_boot
         required: true
         default: 'recovery'
+        type: choice
+        options:
+        - boot
+        - recovery
+        - vendorboot
 
 jobs:
   build:
