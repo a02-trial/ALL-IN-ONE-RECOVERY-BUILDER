@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       MANIFEST_BRANCH:
-        description: 'PBRP Manifest Branch'
+        description: 'TWRP Manifest Branch'
         required: true
         default: 'android-12.1'
         type: choice
@@ -26,12 +26,11 @@ on:
         required: false
         default: ''
       BUILD_TARGET:
-        description: 'Build Target (use "pbrp" for Android 11+)'
+        description: 'Build Target (use "twrp" for Android 11+)'
         required: true
         default: 'recovery'
         type: choice
         options:
-          - pbrp
           - recovery
           - boot
           - vendorboot
@@ -42,7 +41,7 @@ on:
 
 jobs:
   build:
-    name: Build PBRP by ${{ github.actor }}
+    name: Build TWRP by ${{ github.actor }}
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
     env:
@@ -73,8 +72,8 @@ jobs:
         sudo apt install -y python2
         sudo ln -sf /usr/bin/python2 /usr/bin/python
 
-    - name: Build PitchBlack Recovery
-      uses: mlm-games/pitchblack-pbrp-builder-action@main
+    - name: Build TeamWin Recovery
+      uses: mlm-games/teamwin-twrp-builder-action@main
       id: build
       with:
         MANIFEST_BRANCH: ${{ inputs.MANIFEST_BRANCH }}
@@ -86,7 +85,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: inputs.upload_releases == false || github.event_name != 'workflow_dispatch'
       with:
-        name: PBRP-Recovery-${{ env.DEVICE_NAME }}-${{ env.BUILD_DATE }}
+        name: TWRP-Recovery-${{ env.DEVICE_NAME }}-${{ env.BUILD_DATE }}
         path: |
           ${{ env.OUTPUT_DIR }}/*.img
           ${{ env.OUTPUT_DIR }}/*.tar
@@ -99,8 +98,8 @@ jobs:
       with:
         files: |
           ${{ env.OUTPUT_DIR }}/*.img
-          ${{ env.OUTPUT_DIR }}/PBRP*.zip
-        name: PBRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
+          ${{ env.OUTPUT_DIR }}/TWRP*.zip
+        name: TWRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
           ## Build Information
