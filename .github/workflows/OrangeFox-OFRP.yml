@@ -207,14 +207,6 @@ jobs:
           - **Device Tree:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
           
-          ## Build Status
-          - Recovery Image MD5: ${{ env.MD5_IMG }}
-          - ZIP Package MD5: ${{ env.MD5_ZIP }}
-          
-          > Note: This is an automated build. Please test thoroughly before using.
-        prerelease: false
-        draft: false
-          
     - name: Release ramdisk-recovery
       if: env.CHECK_IMG_IS_OK == 'true'
       uses: softprops/action-gh-release@4634c16e79c963813287e889244c50009e7f0981
@@ -225,11 +217,18 @@ jobs:
         name: Unofficial OrangeFox for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
-          Target: ${{ env.RECOVERY_TYPE }}.img
-          Build: ${{ github.event.inputs.MANIFEST_BRANCH }}
-          Device: [Device Tree/Branch](${{ github.event.inputs.DEVICE_TREE }}/tree/${{ github.event.inputs.DEVICE_TREE_BRANCH }})
-          Commit: Most recent [commit](${{ github.event.inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
-          MD5 (img): ${{ env.MD5_IMG }}
+          ## Source Information
+          - **Device:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
+          - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
+          - **Target: ${{ env.RECOVERY_TYPE }}.img
+
+          ## Build Status
+          - Recovery Image MD5: ${{ env.MD5_IMG }}
+          - ZIP Package MD5: ${{ env.MD5_ZIP }}
+
+          > Note: This is an automated build. Please test thoroughly before using.
+        prerelease: false
+        draft: false
           
     - name: Run LDCheck
       run: |
