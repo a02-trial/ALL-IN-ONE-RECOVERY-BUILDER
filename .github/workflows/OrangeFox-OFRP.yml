@@ -206,18 +206,6 @@ jobs:
           ## Source Information
           - **Device Tree:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
-          
-    - name: Release ramdisk-recovery
-      if: env.CHECK_IMG_IS_OK == 'true'
-      uses: softprops/action-gh-release@4634c16e79c963813287e889244c50009e7f0981
-      with:
-        files: |
-          ${{ env.FILE_PATH }}/obj/PACKAGING/vendor_ramdisk_fragments_intermediates/recovery.*
-          ${{ env.FILE_PATH }}/ramdisk-recovery.*
-        name: Unofficial OrangeFox for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
-        tag_name: ${{ github.run_id }}
-        body: |
-          - **Target:** ${{ env.RECOVERY_TYPE }}.img
 
           ## Build Status
           - Recovery Image MD5: ${{ env.MD5_IMG }}
