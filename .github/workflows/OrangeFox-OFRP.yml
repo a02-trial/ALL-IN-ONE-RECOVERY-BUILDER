@@ -101,16 +101,12 @@ jobs:
 
     - name: Building OrangeFox
       run: |
-        pushd ${{ env.ORANGEFOX_ROOT }}
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         set +e
-        export USE_CCACHE=1
-        export CCACHE_EXEC=/usr/bin/ccache
-        sed -i 's/return sandboxConfig\.working/return false/g' build/soong/ui/build/sandbox_linux.go
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         set -e
-        lunch twrp_${{ inputs.DEVICE_NAME }}-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
-        popd
+        ${{ steps.fox_branch.outputs.value }}
 
     - name: Set Build Date # Build date in UTC
       run: |
@@ -134,32 +130,66 @@ jobs:
             echo "::warning::The zip file isn't present but make sure the image is from only after 100% completion in build stage"
         fi
 
-    - name: Upload to Release
-      if: env.CHECK_IMG_IS_OK == 'true'
-      uses: softprops/action-gh-release@master
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
       with:
-        files: |
-          ${{ env.OUTPUT_DIR }}/OrangeFox*.img
-          ${{ env.OUTPUT_DIR }}/OrangeFox*.tar
-          ${{ env.OUTPUT_DIR }}/OrangeFox*.zip
-          ${{ env.OUTPUT_DIR }}/ramdisk-recovery.*
-        name: Unofficial OrangeFox for ${{ inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
+        name: OFOX-Recovery-${{ env.DEVICE_NAME }}-${{ env.BUILD_DATE }}
+        path: ${{ env.OUTPUT_DIR }}/recovery.zip
+
+    - name: Upload to Release
+      if: success()
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ env.OUTPUT_DIR }}/recovery.zip
+        name: PBRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
-          Build: ${{ inputs.MANIFEST_BRANCH }}
-          Device: [Device Tree/Branch](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
-          Commit: Most recent [commit](${{ inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
-          MD5 (img): ${{ env.MD5_IMG }}
-          MD5 (zip): ${{ env.MD5_ZIP }}
-        prerelease: true
+          ## Build Information
+          - **Build Date:** ${{ env.BUILD_DATE }}
+          - **Branch:** ${{ inputs.MANIFEST_BRANCH }}
+          - **Device:** ${{ inputs.DEVICE_NAME }}
+          - **Build Type:** ${{ inputs.BUILD_TARGET }}
 
-    - name: Run LDCheck
-      if: inputs.LDCHECK == 'true'
-      run: |
-        cd tools
-        mv -n libneeds ${GITHUB_WORKSPACE}/${{ env.OUTPUT_DIR }}/${{ inputs.DEVICE_NAME }}/recovery/root/
-        mv -n ldcheck ${GITHUB_WORKSPACE}/${{ env.OUTPUT_DIR }}/${{ inputs.DEVICE_NAME }}/recovery/root/
-        cd ${GITHUB_WORKSPACE}/${{ env.OUTPUT_DIR }}/${{ inputs.DEVICE_NAME }}/recovery/root
-        python3 ldcheck -p system/lib64:vendor/lib64:system/lib:vendor/lib -d ${{ inputs.LDCHECKPATH }}
-        echo "Done checking missing dependencies. Review, and reconfigure your tree."
+          ## Source Information
+          - **Device Tree:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
+          - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
+
+          ## Build Status
+          - Recovery Image MD5: `${{ env.MD5_IMG }}`
+          - ZIP Package MD5: `${{ env.MD5_ZIP }}`
+
+          > Note: This is an automated build. Please test thoroughly before using.
+        prerelease: false
+        draft: false
+
+    - name: Run LDCHECK
+      uses: mlm-games/ldcheck-action@main
+      with:
+        OUTPUT_DIR: ${{ env.OUTPUT_DIR }}
+        LDCHECKPATH: ${{ inputs.LDCHECK_PATH }}
       continue-on-error: true
+
+    - name: Calculate Build Time
+      if: always()
+      run: |
+        BUILD_END=$(date +%s)
+        BUILD_DURATION=$((BUILD_END - BUILD_START))
+
+        hours=$((BUILD_DURATION / 3600))
+        minutes=$(((BUILD_DURATION % 3600) / 60))
+        seconds=$((BUILD_DURATION % 60))
+
+        echo "Build completed in ${hours}h ${minutes}m ${seconds}s"
+
+        # Save build statistics
+        echo "BUILD_DURATION=${BUILD_DURATION}" >> $GITHUB_ENV
+        echo "BUILD_HOURS=${hours}" >> $GITHUB_ENV
+        echo "BUILD_MINUTES=${minutes}" >> $GITHUB_ENV
+        echo "BUILD_SECONDS=${seconds}" >> $GITHUB_ENV
+
+    - name: Cleanup Workspace
+      if: always()
+      run: |
+        cd ${{ github.workspace }}
+        rm -rf android-recovery
+        df -h
