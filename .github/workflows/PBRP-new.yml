@@ -9,14 +9,14 @@ on:
         default: 'android-12.1'
         type: choice
         options:
-          - android-14.0
-          - android-12.1
-          - android-11.0
-          - android-10.0
-          - android-9.0
-          - android-8.1
-          - android-7.1
-          - android-6.0
+        - android-14.0
+        - android-12.1
+        - android-11.0
+        - android-10.0
+        - android-9.0
+        - android-8.1
+        - android-7.1
+        - android-6.0
       DEVICE_TREE:
         description: 'Custom Recovery Tree URL'
         required: true
@@ -31,10 +31,10 @@ on:
         default: 'recovery'
         type: choice
         options:
-          - pbrp
-          - recovery
-          - boot
-          - vendorboot
+        - pbrp
+        - recovery
+        - boot
+        - vendorboot
       LDCHECK_PATH:
         description: 'Path for dependency check (optional)'
         required: false
@@ -49,21 +49,20 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
     permissions:
       contents: write
-      actions: read
-
+      
     steps:
     - name: Initial Setup
       run: |
         echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
         echo "BUILD_DATE=$(TZ=UTC date +%Y%m%d)" >> $GITHUB_ENV
-
+        
     - name: Checkout
       uses: actions/checkout@v4
 
     - name: Clean-up
       uses: rokibhasansagar/slimhub_actions@main
 
-    - name: Swap Space
+    - name: Swap Space   # Easier
       uses: pierotofy/set-swap-space@master
       with:
         swap-size-gb: 24
@@ -73,31 +72,28 @@ jobs:
       id: build
       with:
         MANIFEST_BRANCH: ${{ inputs.MANIFEST_BRANCH }}
-        DEVICE_TREE: ${{ inputs.DEVICE_TREE }}
-        DEVICE_TREE_BRANCH: ${{ inputs.DEVICE_TREE_BRANCH }}
-        BUILD_TARGET: ${{ inputs.BUILD_TARGET }}
-
-    - name: Verify Build Output
-      run: |
-        echo "Output directory: ${{ env.OUTPUT_DIR }}"
-        ls -al ${{ env.OUTPUT_DIR }}
-
-    - name: Zip Artifacts
-      run: |
-        cd ${{ env.OUTPUT_DIR }}
-        zip -r recovery.zip *.img *.tar *vbmeta* *.cpio
-
+        DEVICE_TREE:  ${{ inputs.DEVICE_TREE }}
+        DEVICE_TREE_BRANCH:  ${{ inputs.DEVICE_TREE_BRANCH }}
+        BUILD_TARGET:  ${{ inputs.BUILD_TARGET }}
+  
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
+      if: inputs.upload_releases == false || github.event_name != 'workflow_dispatch'
       with:
         name: PBRP-Recovery-${{ env.DEVICE_NAME }}-${{ env.BUILD_DATE }}
-        path: ${{ env.OUTPUT_DIR }}/recovery.zip
+        path: |
+          ${{ env.OUTPUT_DIR }}/*.img
+          ${{ env.OUTPUT_DIR }}/*.tar
+          ${{ env.OUTPUT_DIR }}/*vbmeta*
+          ${{ env.OUTPUT_DIR }}/*.cpio
 
     - name: Upload to Release
       if: success()
       uses: softprops/action-gh-release@v2
       with:
-        files: ${{ env.OUTPUT_DIR }}/recovery.zip
+        files: |
+          ${{ env.OUTPUT_DIR }}/*.img
+          ${{ env.OUTPUT_DIR }}/PBRP*.zip
         name: PBRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
@@ -106,15 +102,15 @@ jobs:
           - **Branch:** ${{ inputs.MANIFEST_BRANCH }}
           - **Device:** ${{ inputs.DEVICE_NAME }}
           - **Build Type:** ${{ inputs.BUILD_TARGET }}
-
+          
           ## Source Information
           - **Device Tree:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
-
+          
           ## Build Status
-          - Recovery Image MD5: `${{ env.MD5_IMG }}`
-          - ZIP Package MD5: `${{ env.MD5_ZIP }}`
-
+          - Recovery Image MD5: ${{ env.MD5_IMG }}
+          - ZIP Package MD5: ${{ env.MD5_ZIP }}
+          
           > Note: This is an automated build. Please test thoroughly before using.
         prerelease: false
         draft: false
@@ -131,13 +127,13 @@ jobs:
       run: |
         BUILD_END=$(date +%s)
         BUILD_DURATION=$((BUILD_END - BUILD_START))
-
+        
         hours=$((BUILD_DURATION / 3600))
         minutes=$(((BUILD_DURATION % 3600) / 60))
         seconds=$((BUILD_DURATION % 60))
-
+        
         echo "Build completed in ${hours}h ${minutes}m ${seconds}s"
-
+        
         # Save build statistics
         echo "BUILD_DURATION=${BUILD_DURATION}" >> $GITHUB_ENV
         echo "BUILD_HOURS=${hours}" >> $GITHUB_ENV
