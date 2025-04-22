@@ -197,6 +197,12 @@ jobs:
         name: Unofficial OrangeFox for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
+          ## Build Information
+          - **Build Date:** ${{ env.BUILD_DATE }}
+          - **Branch:** ${{ inputs.MANIFEST_BRANCH }}
+          - **Device:** ${{ inputs.DEVICE_NAME }}
+          - **Build Type:** ${{ inputs.BUILD_TARGET }}
+          
           ## Source Information
           - **Device Tree:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
@@ -211,16 +217,10 @@ jobs:
         name: Unofficial OrangeFox for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
-          ## Build Information
-          - **Build Date:** ${{ env.BUILD_DATE }}
-          - **Branch:** ${{ inputs.MANIFEST_BRANCH }}
-          - **Device:** ${{ inputs.DEVICE_NAME }}
-          - **Build Type:** ${{ inputs.BUILD_TARGET }}
-          
           ## Source Information
           - **Device:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
-          - **Target: ${{ env.RECOVERY_TYPE }}.img
+          - **Target:** ${{ env.RECOVERY_TYPE }}.img
 
           ## Build Status
           - Recovery Image MD5: ${{ env.MD5_IMG }}
