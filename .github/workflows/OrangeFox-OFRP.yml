@@ -225,24 +225,6 @@ jobs:
         echo "Done checking missing dependencies. Review, and reconfigure your tree."
       continue-on-error: true
 
-    - name: Calculate Build Time
-      if: always()
-      run: |
-        BUILD_END=$(date +%s)
-        BUILD_DURATION=$((BUILD_END - BUILD_START))
-        
-        hours=$((BUILD_DURATION / 3600))
-        minutes=$(((BUILD_DURATION % 3600) / 60))
-        seconds=$((BUILD_DURATION % 60))
-        
-        echo "Build completed in ${hours}h ${minutes}m ${seconds}s"
-        
-        # Save build statistics
-        echo "BUILD_DURATION=${BUILD_DURATION}" >> $GITHUB_ENV
-        echo "BUILD_HOURS=${hours}" >> $GITHUB_ENV
-        echo "BUILD_MINUTES=${minutes}" >> $GITHUB_ENV
-        echo "BUILD_SECONDS=${seconds}" >> $GITHUB_ENV
-
     - name: Cleanup Workspace
       if: always()
       run: |
