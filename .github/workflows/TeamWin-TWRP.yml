@@ -13,17 +13,8 @@ on:
         default: 'twrp-12.1'
         type: choice
         options:
-        - twrp-14
         - twrp-12.1
         - twrp-11
-        - twrp-10.0-deprecated
-        - twrp-9.0
-        - twrp-8.1
-        - twrp-8.1-macOS
-        - twrp-7.1
-        - twrp-6.0
-        - twrp-5.1
-        - twrp-4.4-deprecated
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
@@ -180,8 +171,18 @@ jobs:
         name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
         tag_name: ${{ github.run_id }}
         body: |
-          Manifest: ${{ github.event.inputs.MANIFEST_BRANCH }}
-          Device: ${{ github.event.inputs.DEVICE_NAME }}
-          Target: ${{ github.event.inputs.BUILD_TARGET }}.img
+          ## Build Information
+          - **Build Date:** ${{ env.BUILD_DATE }}
+          - **Branch:** ${{ inputs.MANIFEST_BRANCH }}
+          - **Device:** ${{ inputs.DEVICE_NAME }}
+          - **Build Type:** ${{ inputs.BUILD_TARGET }}
+          
+          ## Source Information
+          - **Device Tree:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
+          - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
+
+          ## Build Status
+          - Recovery Image MD5: ${{ env.MD5_IMG }}
+          - ZIP Package MD5: ${{ env.MD5_ZIP }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
