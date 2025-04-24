@@ -1,4 +1,4 @@
-name: TWRP Recovery Builder 2024
+name: TeamWin [TWRP]
 
 on:
   workflow_dispatch:
