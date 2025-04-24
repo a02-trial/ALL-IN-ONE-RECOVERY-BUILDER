@@ -183,6 +183,26 @@ jobs:
             cd Exit
         fi
 
+    - name: Rename the Recovery
+      run: |
+        cd ${{ env.FILE_PATH }}/
+        if [ "${{ github.event.inputs.BUILD_TARGET }}" = "boot" ]; then
+        mv OrangeFox*.img boot.img
+        echo "RECOVERY_TYPE=boot" >> $GITHUB_ENV
+        echo "boot.img file found!"
+        elif [ "${{ github.event.inputs.BUILD_TARGET }}" = "recovery" ]; then
+        mv OrangeFox*.img recovery.img
+        echo "RECOVERY_TYPE=recovery" >> $GITHUB_ENV
+        echo "recovery.img file found!"
+        elif [ "${{ github.event.inputs.BUILD_TARGET }}" = "vendorboot" ]; then
+        mv OrangeFox*.img vendor_boot.img
+        echo "RECOVERY_TYPE=vendor_boot" >> $GITHUB_ENV
+        echo "vendor_boot.img file found!"
+        else
+        echo "No Recovery file found!"
+        fi
+      continue-on-error: true
+
     - name: Include Recovery Installer
       run: |
         if [ ${{ github.event.inputs.RECOVERY_INSTALLER }} = true ]; then
@@ -204,10 +224,11 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.RECOVERY_TYPE }}.tar
-          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery-installer.zip
-          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.RECOVERY_TYPE }}.img
-        name: Unofficial TWRP for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
+          ${{ env.FILE_PATH }}/${{ env.RECOVERY_TYPE }}.img
+          ${{ env.FILE_PATH }}/${{ env.RECOVERY_TYPE }}.tar
+          ${{ env.FILE_PATH }}/recovery-installer.zip
+          ${{ env.FILE_PATH }}/TWRP*.zip
+        name: Unofficial TWRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
 
@@ -220,18 +241,35 @@ jobs:
         name: Unofficial TWRP for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
-          Manifest: ${{ github.event.inputs.MANIFEST_BRANCH }}
-          Target: ${{ github.event.inputs.BUILD_TARGET}}.img
-          Device: [Device Tree/Branch](${{ github.event.inputs.DEVICE_TREE }}/tree/${{ github.event.inputs.DEVICE_TREE_BRANCH }})
-          Commit: Most recent [commit](${{ github.event.inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
-          MD5 (img): ${{ env.MD5_IMG }}
+          ## Build Information
+          - **Build Date:** ${{ env.BUILD_DATE }}
+          - **Branch:** ${{ inputs.MANIFEST_BRANCH }}
+          - **Device:** ${{ inputs.DEVICE_NAME }}
+          - **Build Type:** ${{ inputs.BUILD_TARGET }}
           
-    - name: Checking For Missing Dependencies
+          ## Source Information
+          - **Device Tree:** [${{ inputs.DEVICE_TREE }}](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
+          - **Branch:** ${{ inputs.DEVICE_TREE_BRANCH }}
+
+          ## Build Status
+          - Recovery Image MD5: ${{ env.MD5_IMG }}
+          - ZIP Package MD5: ${{ env.MD5_ZIP }}
+
+          > Note: This is an automated build. Please test thoroughly before using.
+          
+    - name: Run LDCheck
       run: |
         cd tools
-        mv -n libneeds ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery/root/
-        mv -n ldcheck ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery/root/
-        cd ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery/root
+        mv -n libneeds ${{ env.FILE_PATH }}/recovery/root/
+        mv -n ldcheck ${{ env.FILE_PATH }}/recovery/root/
+        cd ${{ env.FILE_PATH }}/recovery/root/
         python3 ldcheck -p system/lib64:vendor/lib64:system/lib:vendor/lib -d ${{ github.event.inputs.LDCHECK }}
         echo "Done checking missing dependencies. Review, and reconfigure your tree."
       continue-on-error: true
+
+    - name: Cleanup Workspace
+      if: always()
+      run: |
+        cd ${{ github.workspace }}
+        rm -rf android-recovery
+        df -h
