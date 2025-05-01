@@ -207,7 +207,7 @@ jobs:
           workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.RECOVERY_TYPE }}.tar
           workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.RECOVERY_TYPE }}.img
           workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery-installer.zip
-          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.FILE_PATH }}/TWRP*.zip
+          workspace/out/target/product/twrp_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
         name: Unofficial TWRP for ${{ inputs.DEVICE_NAME }} - ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
