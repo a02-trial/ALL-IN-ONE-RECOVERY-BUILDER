@@ -24,7 +24,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'Device Tree Branch (optional)'
         required: true
-        default: 'A022FXXS3BVB1'
+        default: 'a11'
       BUILD_TARGET:
         description: 'Build Target (use "pbrp" for Android 11+)'
         required: true
