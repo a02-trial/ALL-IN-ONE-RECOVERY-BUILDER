@@ -35,10 +35,6 @@ on:
         - recovery
         - boot
         - vendorboot
-      LDCHECK_PATH:
-        description: 'Path for dependency check (optional)'
-        required: false
-        default: 'recovery/root/system/bin/qseecomd'
 
 jobs:
   build:
