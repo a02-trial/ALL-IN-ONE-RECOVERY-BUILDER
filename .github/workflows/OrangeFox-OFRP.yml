@@ -18,7 +18,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'Custom Recovery Tree Branch'
         required: true
-        default: 'twrp11'
+        default: 'A022FXXS3BVB1'
       DEVICE_PATH:
         description: 'Specify your device path.'
         required: true
