@@ -62,7 +62,7 @@ jobs:
         echo "Build Target: ${{ github.event.inputs.BUILD_TARGET }}image"
         echo "Include Recovery Installer: ${{ github.event.inputs.RECOVERY_INSTALLER }}"
         echo "Release recovery.tar For Samsung devices: ${{ github.event.inputs.RECOVERY_TAR }}"
-        echo "::endgroup::
+        echo "::endgroup::"
         
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
