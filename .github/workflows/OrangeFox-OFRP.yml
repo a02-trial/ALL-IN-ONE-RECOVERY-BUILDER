@@ -124,8 +124,8 @@ jobs:
         export FOX_VANILLA_BUILD=true
         export OF_USE_LZMA_COMPRESSION=true
         export FOX_DRASTIC_SIZE_REDUCTION=true
-        export FOX_DELETE_AROMAFM := true
-        export OF_MAINTAINER := SusuJahe
+        export FOX_DELETE_AROMAFM=true
+        export OF_MAINTAINER=SusuJahe
         set -e
         ${{ steps.fox_branch.outputs.value }}
 
